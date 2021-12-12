@@ -99,7 +99,7 @@ void setup_tissue( void );
 
 // coloring functions 
 
-std::vector<std::string> cell_coloring_function( Cell* pCell );
+std::vector<std::string> my_coloring_function( Cell* pCell );
 
 // these are the custom functions for these cells 
 

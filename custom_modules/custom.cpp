@@ -159,7 +159,7 @@ void pheno_update( Cell* pCell , Phenotype& phenotype , double dt )
 	return; 
 }
 
-std::vector<std::string> cell_coloring_function( Cell* pCell )
+std::vector<std::string> my_coloring_function( Cell* pCell )
 {
 	std::string color = "black"; 
 	std::vector< std::string > output( 4 , color ); 
@@ -199,7 +199,7 @@ void setup_tissue( void )
 	load_cells_from_pugixml(); 		
 	
 	PhysiCell_SVG_options.length_bar = 200; 
-	SVG_plot( "initial.svg" , microenvironment, 0.0 , 0.0 , cell_coloring_function );	
+	SVG_plot( "initial.svg" , microenvironment, 0.0 , 0.0 , my_coloring_function );	
 	
 	return; 
 }
