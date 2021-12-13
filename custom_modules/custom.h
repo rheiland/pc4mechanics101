@@ -106,3 +106,4 @@ std::vector<std::string> my_coloring_function( Cell* pCell );
 // void extra_elastic_attachment_mechanics( Cell* pCell, Phenotype& phenotype, double dt );
 
 void pheno_update( Cell* pCell, Phenotype& phenotype, double dt ); 
+void custom_cell_update( Cell* pCell, Phenotype& phenotype, double dt ); 

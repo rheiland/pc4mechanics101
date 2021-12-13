@@ -126,10 +126,11 @@ void create_cell_types( void )
 	
 	Cell_Definition* pCD = find_cell_definition( "default" ); 
 	pCD->functions.update_phenotype = pheno_update; 
-	pCD->functions.custom_cell_rule = NULL; // extra_elastic_attachment_mechanics;  // pre-1.8.0
+	// pCD->functions.custom_cell_rule = NULL; // extra_elastic_attachment_mechanics;  // pre-1.8.0
+	pCD->functions.custom_cell_rule = custom_cell_update;   // dt_mechanics
 	pCD->functions.contact_function = standard_elastic_contact_function; 
 	// pCD->functions.update_migration_bias = worker_cell_motility;
-	pCD->phenotype.mechanics.attachment_elastic_constant = parameters.doubles( "elastic_coefficient" );
+	pCD->phenotype.mechanics.attachment_elastic_constant = parameters.doubles( "elastic_const" );
 
 	/*
 	   This builds the map of cell definitions and summarizes the setup. 
@@ -156,6 +157,48 @@ void pheno_update( Cell* pCell , Phenotype& phenotype , double dt )
 		pCell->functions.update_phenotype = NULL; 
 	}
 	
+	return; 
+}
+
+// BM adhesion-repulsion model (every dt_mechanics)
+void custom_cell_update( Cell* pCell , Phenotype& phenotype , double dt )
+{
+	// std::vector<Cell*> nearby = pCell->cells_in_my_container(); 
+	
+    // cap letters (X,N, etc) represent vectors
+    // Agent vars:
+    //   position = X
+    //   radius = r
+    //   adhesion radius = r_A
+
+    if (pCell->ID == 0)
+    {
+        std::cout << "ID=0, phenotype.geometry.radius = " << phenotype.geometry.radius << std::endl;
+    }
+
+    double adhesion_radius = phenotype.geometry.radius * phenotype.mechanics.relative_maximum_adhesion_distance;
+    int ncells_attached = 0;
+
+	if( pCell->custom_data["attach_to_BM"] == 0.0 )  // not attached to BM
+	{
+        double d = 0.0 - pCell->position[1];  // just (negative) y (height) for test case
+        std::cout << "t="<<PhysiCell_globals.current_time << ", ID=" << pCell->ID << ": d= " << d <<", adhesion radius= " << adhesion_radius << std::endl;
+//        double pv = <0,-1,0> 
+//        double nv = pv - d*nv;
+        if (d <= 0.0 && d > -adhesion_radius )
+        {
+            // double p_BM = pv - d*nv
+            pCell->custom_data["attach_to_BM"] = 1.0;   // attached to BM now
+            ncells_attached++;
+        }
+	}
+    else
+    {
+        ncells_attached++;
+    }
+    // displacement = X_BM - X = D
+	
+    // std::cout << "---- custom_cell_update(): ncells_attached = " << ncells_attached << std::endl;
 	return; 
 }
 
