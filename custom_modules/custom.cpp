@@ -163,6 +163,11 @@ void pheno_update( Cell* pCell , Phenotype& phenotype , double dt )
 // BM adhesion-repulsion model (every dt_mechanics)
 void custom_cell_update( Cell* pCell , Phenotype& phenotype , double dt )
 {
+    static int num_attached_BM = 0;
+    static int attach_lifetime_i = pCell->custom_data.find_variable_index( "attach_lifetime" ); 
+    static int attach_time_i = pCell->custom_data.find_variable_index( "attach_time" ); 
+    static int attach_to_BM_i = pCell->custom_data.find_variable_index( "attach_to_BM" ); 
+
 	// std::vector<Cell*> nearby = pCell->cells_in_my_container(); 
 	
     // cap letters (X,N, etc) represent vectors
@@ -179,25 +184,54 @@ void custom_cell_update( Cell* pCell , Phenotype& phenotype , double dt )
     double adhesion_radius = phenotype.geometry.radius * phenotype.mechanics.relative_maximum_adhesion_distance;
     int ncells_attached = 0;
 
-	if( pCell->custom_data["attach_to_BM"] == 0.0 )  // not attached to BM
+    double displacement = 0.0 - pCell->position[1];  // displacement: just (negative) y (height) for test case
+    //===================================
+    //   attach
+    //===================================
+	if( pCell->custom_data[attach_to_BM_i] == 0.0 )  // not attached to BM
 	{
-        double d = 0.0 - pCell->position[1];  // just (negative) y (height) for test case
-        std::cout << "t="<<PhysiCell_globals.current_time << ", ID=" << pCell->ID << ": d= " << d <<", adhesion radius= " << adhesion_radius << std::endl;
+        // double d = 0.0 - pCell->position[1];  // just (negative) y (height) for test case
+        // std::cout << "t="<<PhysiCell_globals.current_time << ", ID=" << pCell->ID << ": d= " << d <<", adhesion radius= " << adhesion_radius << std::endl;
 //        double pv = <0,-1,0> 
 //        double nv = pv - d*nv;
-        if (d <= 0.0 && d > -adhesion_radius )
+        if (displacement <= 0.0 && displacement > -adhesion_radius )
         {
+            std::cout << "t="<<PhysiCell_globals.current_time << "attaching ID=" << pCell->ID << ": displacement= " << displacement <<", adhesion radius= " << adhesion_radius << std::endl;
             // double p_BM = pv - d*nv
-            pCell->custom_data["attach_to_BM"] = 1.0;   // attached to BM now
+            pCell->custom_data[attach_to_BM_i] = 1.0;   // attached to BM now
+            pCell->custom_data[attach_time_i] = 0.0;   // attached to BM now
             ncells_attached++;
+            num_attached_BM++;
+            // phenotype.motility.is_motile = false; 
         }
 	}
-    else
-    {
-        ncells_attached++;
-    }
+    // else
+    // {
+    //     ncells_attached++;
+    // }
     // displacement = X_BM - X = D
+
+    pCell->custom_data[attach_time_i] += dt;
+
+    //===================================
+    //   mechanics
+    //===================================
+    pCell->velocity[1] += pCell->custom_data[attach_lifetime_i] * displacement;
+    // axpy( &(pActingOn->velocity) , pao.mechanics.attachment_elastic_constant , displacement );   // cancer_immune_3D
 	
+    //===================================
+    //   detach
+    //===================================
+    // if( UniformRandom() < dt / ( pCell->custom_data[attach_lifetime_i] + 1e-15 ) )
+    if( pCell->custom_data[attach_time_i] > pCell->custom_data[attach_lifetime_i] )
+    {
+        pCell->custom_data[attach_to_BM_i] = 0.0;   // detach from BM 
+        // detach_cells( pCell, pCell->state.attached_cells[0] ); 
+        // phenotype.motility.is_motile = true; 
+    }
+
+    // if (pCell->ID == 51)
+    //     std::cout << "(at ID=51)----- num_attached_BM = "<<num_attached_BM << std::endl;
     // std::cout << "---- custom_cell_update(): ncells_attached = " << ncells_attached << std::endl;
 	return; 
 }

@@ -36,6 +36,8 @@ mcds = [pyMCDS_cells(xml_files[i], data_dir) for i in range(ds_count)]
 tval = np.linspace(0, mcds[-1].get_time(), ds_count)
 print('tval= ',tval)
 
+plt.figure(figsize=(11, 3))
+
 #-----------------------------------------------------
 def circles(x, y, s, c='b', vmin=None, vmax=None, **kwargs):
     """
@@ -130,8 +132,9 @@ r = np.sqrt(r)
 # print(r)
 # plt.plot(xvals,yvals,'o')
 #circles(xvals,yvals, s=rvals, color=rgbs)
-circles(xvals,yvals, s=r)
+circles(xvals,yvals, s=r, ec='red')
 
+plt.ylim([-5,25])
 plt.title(data_dir + ": frame= " + str(iframe))
 #plt.savefig(data_dir + '.png')
 plt.show()
