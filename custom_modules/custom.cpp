@@ -199,7 +199,7 @@ void custom_cell_update( Cell* pCell , Phenotype& phenotype , double dt )
             std::cout << "t="<<PhysiCell_globals.current_time << "attaching ID=" << pCell->ID << ": displacement= " << displacement <<", adhesion radius= " << adhesion_radius << std::endl;
             // double p_BM = pv - d*nv
             pCell->custom_data[attach_to_BM_i] = 1.0;   // attached to BM now
-            pCell->custom_data[attach_time_i] = 0.0;   // attached to BM now
+            pCell->custom_data[attach_time_i] = 0.0;   // reset its time of being attached
             ncells_attached++;
             num_attached_BM++;
             // phenotype.motility.is_motile = false; 
